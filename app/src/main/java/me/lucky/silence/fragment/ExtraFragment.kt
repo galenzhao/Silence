@@ -2,12 +2,16 @@ package me.lucky.silence.fragment
 
 import android.Manifest
 import android.content.Context
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 
@@ -73,6 +77,26 @@ class ExtraFragment : Fragment() {
             }
 
             return@doAfterTextChanged
+        }
+        // on below line adding click listener for button.
+        hideBtn.setOnClickListener {
+
+            // on below line getting current view.
+            val view: View? = activity?.currentFocus
+
+            // on below line checking if view is not null.
+            if (view != null) {
+                // on below line we are creating a variable
+                // for input manager and initializing it.
+                val inputMethodManager =
+                    ctx.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+
+                // on below line hiding our keyboard.
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0)
+
+                // displaying toast message on below line.
+                Toast.makeText(ctx, "Key board hidden", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

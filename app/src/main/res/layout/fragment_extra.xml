@@ -134,6 +134,15 @@
                     android:singleLine="true"
                     android:textAppearance="?attr/textAppearanceCaption" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!--button to hide our key board-->
+            <Button
+                android:id="@+id/hideBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:text="Hide Key Board"
+                android:textAllCaps="false" />
         </LinearLayout>
     </ScrollView>
 </FrameLayout>
