@@ -44,7 +44,8 @@ class ExtraFragment : Fragment() {
             plusNumbers.isChecked = prefs.isBlockPlusNumbers
             stir.isEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
             stir.isChecked = prefs.isStirChecked
-            txtLayoutRegex.editText?.setText(prefs.regexPattern)
+            txtLayoutRegexBlock.editText?.setText(prefs.regexPatternBlock)
+            txtLayoutRegexAllow.editText?.setText(prefs.regexPatternAllow)
         }
     }
 
@@ -66,14 +67,26 @@ class ExtraFragment : Fragment() {
             prefs.isStirChecked = isChecked
         }
 
-        txtLayoutRegex.editText?.doAfterTextChanged {
+        txtLayoutRegexBlock.editText?.doAfterTextChanged {
             val txt = it?.toString()
             if(isBlockRegexValid(txt)) {
-                prefs.regexPattern = txt
-                txtLayoutRegex.error = ""
+                prefs.regexPatternBlock = txt
+                txtLayoutRegexBlock.error = ""
             }
             else {
-                txtLayoutRegex.error = "Invalid regex!"
+                txtLayoutRegexBlock.error = "Invalid regex!"
+            }
+
+            return@doAfterTextChanged
+        }
+        txtLayoutRegexAllow.editText?.doAfterTextChanged {
+            val txt = it?.toString()
+            if(isBlockRegexValid(txt)) {
+                prefs.regexPatternAllow = txt
+                txtLayoutRegexAllow.error = ""
+            }
+            else {
+                txtLayoutRegexAllow.error = "Invalid regex!"
             }
 
             return@doAfterTextChanged
@@ -107,7 +120,7 @@ class ExtraFragment : Fragment() {
             pattern.toRegex()
         }
         catch(ex: java.util.regex.PatternSyntaxException) {
-            //Toast.makeText(this.ctx, ex.message, Toast.LENGTH_LONG).show()
+            Toast.makeText(this.ctx, ex.message, Toast.LENGTH_LONG).show()
             return false
         }
         return true

@@ -111,6 +111,38 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="34dp"
+                android:text="Allow By Pattern"
+                android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Allow phone number matching regular expression."
+                android:textAppearance="?attr/textAppearanceBodySmall" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/txtLayoutRegexAllow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/groups_match_regex_hint">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtInputRegexAllow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:textAppearance="?attr/textAppearanceCaption" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="5dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="34dp"
                 android:text="@string/groups_match_regex"
                 android:textAppearance="?attr/textAppearanceBodyLarge" />
 
@@ -120,14 +152,14 @@
                 android:text="@string/groups_match_regex_description"
                 android:textAppearance="?attr/textAppearanceBodySmall" />
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/txtLayoutRegex"
+                android:id="@+id/txtLayoutRegexBlock"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="@string/groups_match_regex_hint">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/txtInputRegex"
+                    android:id="@+id/txtInputRegexBlock"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"

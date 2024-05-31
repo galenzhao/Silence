@@ -56,18 +56,28 @@ class CallScreeningService : CallScreeningService() {
         }
 
         if (
-            prefs.isBlockEnabled ||
-            (prefs.isBlockPlusNumbers && isPlusNumber(callDetails))
+            !prefs.regexPatternAllow.isNullOrBlank() && matchesBlockRegex(
+                callDetails,
+                prefs.regexPatternAllow!!.toRegex()
+            )
+        ) {
+            respondAllow(callDetails)
+            return
+        }
+
+        if (
+            !prefs.regexPatternBlock.isNullOrBlank() && matchesBlockRegex(
+                callDetails,
+                prefs.regexPatternBlock!!.toRegex()
+            )
         ) {
             respondNotAllow(callDetails)
             return
         }
 
         if (
-            !prefs.regexPattern.isNullOrBlank() && matchesBlockRegex(
-                callDetails,
-                prefs.regexPattern!!.toRegex()
-            )
+            prefs.isBlockEnabled ||
+            (prefs.isBlockPlusNumbers && isPlusNumber(callDetails))
         ) {
             respondNotAllow(callDetails)
             return
