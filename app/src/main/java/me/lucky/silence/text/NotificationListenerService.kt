@@ -1,25 +1,26 @@
 package me.lucky.silence.text
 
 import android.app.Notification
-import android.app.job.JobInfo
-import android.app.job.JobScheduler
-import android.content.ComponentName
 import android.database.sqlite.SQLiteConstraintException
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.telephony.TelephonyManager
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import me.lucky.silence.AllowNumber
+import me.lucky.silence.AllowNumberDao
+import me.lucky.silence.AppDatabase
+import me.lucky.silence.Message
+import me.lucky.silence.Preferences
 import java.util.concurrent.TimeUnit
-
-import me.lucky.silence.*
 
 class NotificationListenerService : NotificationListenerService() {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     private lateinit var prefs: Preferences
     private lateinit var db: AllowNumberDao
     private var telephonyManager: TelephonyManager? = null
-    private var jobScheduler: JobScheduler? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -30,7 +31,6 @@ class NotificationListenerService : NotificationListenerService() {
         prefs = Preferences(this)
         db = AppDatabase.getInstance(this).allowNumberDao()
         telephonyManager = getSystemService(TelephonyManager::class.java)
-        jobScheduler = getSystemService(JobScheduler::class.java)
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
@@ -41,7 +41,8 @@ class NotificationListenerService : NotificationListenerService() {
         var hasNumber = false
         for (number in phoneNumberUtil
             .findNumbers(
-                sbn.notification.extras[Notification.EXTRA_TEXT]?.toString() ?: return,
+                sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
+                    ?: return,
                 telephonyManager?.networkCountryIso?.uppercase(),
             )
             .asSequence()
@@ -49,10 +50,10 @@ class NotificationListenerService : NotificationListenerService() {
             .filter { phoneNumberUtil.getNumberType(it) == PhoneNumberUtil.PhoneNumberType.MOBILE }
             .map { AllowNumber.new(it, prefs.messagesTextTtl) }
         ) {
-            try { db.insert(number) } catch (exc: SQLiteConstraintException) { db.update(number) }
+            try { db.insert(number) } catch (_: SQLiteConstraintException) { db.update(number) }
             hasNumber = true
         }
-        if (hasNumber) schedule()
+        if (hasNumber) scheduleCleanup()
     }
 
     override fun onListenerConnected() {
@@ -61,17 +62,10 @@ class NotificationListenerService : NotificationListenerService() {
             migrateNotificationFilter(0, null)
     }
 
-    private fun schedule() =
-        jobScheduler?.schedule(
-            JobInfo.Builder(
-                CleanJobService.JOB_ID,
-                ComponentName(this, CleanJobService::class.java),
-            )
-                .setMinimumLatency(
-                    TimeUnit
-                        .MINUTES
-                        .toMillis(prefs.messagesTextTtl.toLong() + 5))
-                .setPersisted(true)
-                .build()
-        )
+    private fun scheduleCleanup() =
+        WorkManager
+            .getInstance(this)
+            .enqueue(OneTimeWorkRequestBuilder<CleanupWorker>()
+                .setInitialDelay(prefs.messagesTextTtl.toLong() + 5, TimeUnit.MINUTES)
+                .build())
 }

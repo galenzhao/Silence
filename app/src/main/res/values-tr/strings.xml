@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="contacted_main">Aranmış</string>
+    <string name="contacted_main">İletişim kurulmuş</string>
     <string name="contacted_description">Daha önce iletişime geçtiğiniz numaralardan gelen aramalara izin ver.</string>
     <string name="groups_main">Gruplar</string>
     <string name="groups_description">Seçili gruplardaki numaralardan gelen aramalara izin ver.</string>
@@ -49,14 +49,13 @@
     <string name="settings_skip_notification_description">Gelen arama için bir cevapsız arama bildiriminin gösterilmemesi gerekip gerekmediğini ayarlar. Bu yalnızca aramaya izin verilmiyorsa işaretlenmelidir.</string>
     <string name="sim_1_description">SIM 1\'den gelen tüm aramalara izin ver.</string>
     <string name="sim_2_description">SIM 2\'den gelen tüm aramalara izin ver.</string>
-    <string name="main">Ana</string>
     <string name="messages_text_description">Gelen mesajlar metninde bulunan cep telefonu numaralarından gelen aramalara geçici olarak izin ver.</string>
     <string name="settings_controller_description">Genel yayın alıcısının Silence\'ı intent\'lerle denetlemesini etkinleştirir.</string>
     <string name="settings_disallow_call_description">Gelen aramanın engellenip engellenmeyeceğini ayarlar.</string>
     <string name="settings_silence_call_description">Gelen arama için zil sesinin kapatılıp kapatılmayacağını ayarlar. Bununla birlikte, arama engellenmemişse öntanımlı telefon uygulamasına gönderilmeye devam edecektir. Bunun işaretlenmesi yalnızca aramaya izin verilmediğinde anlamlıdır.</string>
     <string name="messages_text_ttl_error">7d / 48h / 120m</string>
     <string name="messages_text_ttl_helper_text">Numaranın sizi ne kadar süre arayabileceği. Değiştiriciler: [d]gün [h]saat [m]dakika</string>
-    <string name="messages_text_ttl_hint">süre</string>
+    <string name="messages_text_ttl_hint">Süre</string>
     <string name="goto_button">GİT</string>
     <string name="extra_short_numbers">Kısa numaralar</string>
     <string name="groups_mobile">Cep telefonu</string>
@@ -69,9 +68,20 @@
     <string name="extra_contacts_description">Kişilerinizdeki numaralardan gelen aramalara izin ver.</string>
     <string name="extra_contacts">Kişiler</string>
     <string name="block_main">Engelle</string>
-    <string name="extra_plus_numbers_description">Artı ile başlayan numaralardan gelen aramaları engelle.</string>
+    <string name="extra_plus_numbers_description">Artı ile başlamayan numaralardan gelen aramalara izin ver.</string>
     <string name="extra_plus_numbers">Artılı numaralar</string>
     <string name="block_description">Tüm gelen aramaları engelle. Rehberdeki numaraları da engellemek için izin vermeniz gerekir.</string>
     <string name="repeated_burst_timeout_hint">Zaman aşımı</string>
     <string name="repeated_burst_timeout_helper_text">Tekrarlanan aramalar arasında saniye cinsinden asgari zaman aşımı.</string>
+    <string name="regex_pattern_hint">Desen</string>
+    <string name="regex_pattern_error">Geçersiz düzenli ifade!</string>
+    <string name="regex_main">Düzenli ifade</string>
+    <string name="regex_pattern_helper_text">Düzenli ifadeyle eşleşen numaralardan gelen aramaları engelle.</string>
+    <string name="contacted_answer">Yanıtla</string>
+    <string name="contacted_answer_description">Daha önce yanıtladığınız numaralardan gelen aramalara izin ver.</string>
+    <string name="extra_description">Bazı çeşitli gruplardan/tanımlayıcılardan gelen aramalara izin ver.</string>
+    <string name="sim_description">Bir veya her iki SIM karttan gelen tüm aramalara izin verin.</string>
+    <string name="toggle_off">Kapalı</string>
+    <string name="back">Geri</string>
+    <string name="toggle_on">Açık</string>
 </resources>
