@@ -189,5 +189,10 @@ class CallScreeningService : CallScreeningService() {
 
     private fun isPlusNumber(callDetails: Call.Details) =
         callDetails.handle?.schemeSpecificPart?.startsWith('+') ?: false
+
+    private fun matchesBlockRegex(callDetails: Call.Details, pattern: Regex): Boolean {
+        var phoneNumber = callDetails.handle?.schemeSpecificPart ?: return false
+        val retval = pattern.matchEntire(phoneNumber) != null
+        return retval
 }
 }

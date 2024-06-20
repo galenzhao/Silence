@@ -28,7 +28,7 @@ fun RegexScreen(prefs: Preferences, onBackPressed: () -> Boolean) {
     var regexError by remember { mutableStateOf(false) }
     val regexDescription = stringResource(R.string.regex_pattern_helper_text)
     var regexSupportingText by remember { mutableStateOf(regexDescription) }
-    var regexText by remember { mutableStateOf(prefs.regexPattern ?: "") }
+    var regexText by remember { mutableStateOf(prefs.regexPatternBlock ?: "") }
 
     Screen(title = R.string.regex_main, onBackPressed = onBackPressed, content = {
         Row(modifier = Modifier.padding(horizontal = 8.dp)) {
@@ -44,7 +44,7 @@ fun RegexScreen(prefs: Preferences, onBackPressed: () -> Boolean) {
                         regexSupportingText = regexErrorHint
                     } else {
                         regexSupportingText = regexDescription
-                        prefs.regexPattern = newValue
+                        prefs.regexPatternBlock = newValue
                     }
                     regexText = newValue
                 },
