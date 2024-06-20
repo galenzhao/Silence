@@ -8,12 +8,16 @@ import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresApi
 import androidx.core.text.isDigitsOnly
-import kotlin.properties.Delegates
-
 import com.google.i18n.phonenumbers.NumberParseException
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber
-import me.lucky.silence.*
+import me.lucky.silence.Modem
+import me.lucky.silence.NotificationManager
+import me.lucky.silence.Preferences
+import me.lucky.silence.ResponseOption
+import me.lucky.silence.Sim
+import me.lucky.silence.Utils
+import kotlin.properties.Delegates
 
 class CallScreeningService : CallScreeningService() {
     private lateinit var prefs: Preferences
@@ -33,7 +37,7 @@ class CallScreeningService : CallScreeningService() {
         prefs = Preferences(this)
         callScreeningHelper = CallScreeningHelper(this)
         phoneNumberUtil = PhoneNumberUtil.getInstance()
-        isMultiSim = Utils.getModemCount(this) >= 2
+        isMultiSim = Utils.getModemCount(this, Modem.SUPPORTED) >= 2
         telephonyManager = getSystemService(TelephonyManager::class.java)
         subscriptionManager = getSystemService(SubscriptionManager::class.java)
     }
@@ -42,15 +46,12 @@ class CallScreeningService : CallScreeningService() {
         if (!prefs.isEnabled) {
             respondAllow(callDetails)
             return
-        }
-
-        if (isEmergency(callDetails)) {
+        } else if (isEmergency(callDetails)) {
+            prefs.isEnabled = false
             Utils.setMessagesTextEnabled(this, false)
             respondAllow(callDetails)
             return
-        }
-
-        if (callDetails.callDirection != Call.Details.DIRECTION_INCOMING) {
+        } else if (callDetails.callDirection != Call.Details.DIRECTION_INCOMING) {
             respondAllow(callDetails)
             return
         }
@@ -65,7 +66,7 @@ class CallScreeningService : CallScreeningService() {
             return
         }
 
-        if (
+        if (prefs.isEnabled &&
             !prefs.regexPatternBlock.isNullOrBlank() && matchesBlockRegex(
                 callDetails,
                 prefs.regexPatternBlock!!.toRegex()
@@ -87,19 +88,19 @@ class CallScreeningService : CallScreeningService() {
             (prefs.isStirChecked && isStirVerified(callDetails)) ||
             (prefs.isUnknownNumbersChecked && isUnknownNumber(callDetails)) ||
             (prefs.isShortNumbersChecked && isShortNumber(callDetails)) ||
+            (prefs.isNotPlusNumbersChecked && isNotPlusNumber(callDetails)) ||
             checkSim()
         ) {
             respondAllow(callDetails)
             return
         }
-
         val number: Phonenumber.PhoneNumber
         try {
             number = phoneNumberUtil.parse(
                 callDetails.handle?.schemeSpecificPart,
                 telephonyManager?.networkCountryIso?.uppercase(),
             )
-        } catch (exc: NumberParseException) {
+        } catch (_: NumberParseException) {
             respondNotAllow(callDetails)
             return
         }
@@ -116,19 +117,28 @@ class CallScreeningService : CallScreeningService() {
         val tel = callDetails.handle?.schemeSpecificPart
         val isNotify = responseOptions.and(ResponseOption.SkipNotification.value) == 0
                 && tel != null
-        respondToCall(
-            callDetails,
-            CallResponse.Builder()
-                .setDisallowCall(disallowCall)
-                .setRejectCall(responseOptions.and(ResponseOption.RejectCall.value) != 0
-                        && disallowCall)
-                .setSilenceCall(responseOptions.and(ResponseOption.SilenceCall.value) != 0)
-                .setSkipCallLog(responseOptions.and(ResponseOption.SkipCallLog.value) != 0
-                        && disallowCall)
-                .setSkipNotification(!isNotify && disallowCall)
-                .build(),
-        )
-        if (isNotify && disallowCall) notificationManager.notifyBlockedCall(tel)
+        val response = CallResponse.Builder()
+            .setDisallowCall(disallowCall)
+            .setRejectCall(responseOptions.and(ResponseOption.RejectCall.value) != 0
+                    && disallowCall)
+            .setSilenceCall(responseOptions.and(ResponseOption.SilenceCall.value) != 0)
+            .setSkipCallLog(responseOptions.and(ResponseOption.SkipCallLog.value) != 0
+                    && disallowCall)
+            .setSkipNotification(!isNotify && disallowCall)
+            .build()
+        if (isNotify && disallowCall) {
+            var sim: Sim? = null
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                Utils.getModemCount(this, Modem.ACTIVE) >= 2) {
+                sim = when {
+                    checkSimSlot(0) -> Sim.SIM_1
+                    checkSimSlot(1) -> Sim.SIM_2
+                    else -> null
+                }
+            }
+            notificationManager.notifyBlockedCall(tel ?: return, sim)
+        }
+        respondToCall(callDetails, response)
     }
 
     private fun isStirVerified(callDetails: Call.Details) =
@@ -157,7 +167,7 @@ class CallScreeningService : CallScreeningService() {
                     ?.getActiveSubscriptionInfoForSimSlotIndex(slotIndex)
                     ?.subscriptionId ?: return false)
                 ?.callStateForSubscription == TelephonyManager.CALL_STATE_RINGING
-        } catch (exc: SecurityException) { false }
+        } catch (_: SecurityException) { false }
     }
 
     private fun isUnknownNumber(callDetails: Call.Details) =
@@ -169,12 +179,15 @@ class CallScreeningService : CallScreeningService() {
         return v.length in 3..5 && v.isDigitsOnly()
     }
 
+    private fun isNotPlusNumber(callDetails: Call.Details) =
+        callDetails.handle?.schemeSpecificPart?.startsWith('+') == false
+
+    private fun checkBlockRegex(callDetails: Call.Details): Boolean {
+        val phoneNumber = callDetails.handle?.schemeSpecificPart ?: return false
+        return prefs.regexPatternBlock?.toRegex(RegexOption.MULTILINE)?.matchEntire(phoneNumber) != null
+    }
+
     private fun isPlusNumber(callDetails: Call.Details) =
         callDetails.handle?.schemeSpecificPart?.startsWith('+') ?: false
-
-    private fun matchesBlockRegex(callDetails: Call.Details, pattern: Regex): Boolean {
-        var phoneNumber = callDetails.handle?.schemeSpecificPart ?: return false
-        val retval = pattern.matchEntire(phoneNumber) != null
-        return retval
-    }
+}
 }
