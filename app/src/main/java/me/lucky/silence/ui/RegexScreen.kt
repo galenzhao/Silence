@@ -26,27 +26,55 @@ import me.lucky.silence.ui.common.Screen
 fun RegexScreen(prefs: Preferences, onBackPressed: () -> Boolean) {
     val regexErrorHint = stringResource(R.string.regex_pattern_error)
     var regexError by remember { mutableStateOf(false) }
-    val regexDescription = stringResource(R.string.regex_pattern_helper_text)
-    var regexSupportingText by remember { mutableStateOf(regexDescription) }
-    var regexText by remember { mutableStateOf(prefs.regexPatternBlock ?: "") }
+    val regexDescriptionBlock = stringResource(R.string.regex_pattern_helper_text_block)
+    var regexSupportingTextBlock by remember { mutableStateOf(regexDescriptionBlock) }
+    var regexTextBlock by remember { mutableStateOf(prefs.regexPatternBlock ?: "") }
+    val regexDescriptionAllow = stringResource(R.string.regex_pattern_helper_text_allow)
+    var regexSupportingTextAllow by remember { mutableStateOf(regexDescriptionAllow) }
+    var regexTextAllow by remember { mutableStateOf(prefs.regexPatternAllow ?: "") }
 
     Screen(title = R.string.regex_main, onBackPressed = onBackPressed, content = {
         Row(modifier = Modifier.padding(horizontal = 8.dp)) {
             OutlinedTextField(
                 label = { Text(stringResource(R.string.regex_pattern_hint)) },
-                supportingText = { Text(regexSupportingText) },
+                supportingText = { Text(regexSupportingTextBlock) },
                 singleLine = false,
-                value = regexText,
+                value = regexTextBlock,
                 isError = regexError,
                 onValueChange = { newValue ->
                     regexError = !isValidRegex(newValue)
                     if (regexError) {
-                        regexSupportingText = regexErrorHint
+                        regexSupportingTextBlock = regexErrorHint
                     } else {
-                        regexSupportingText = regexDescription
+                        regexSupportingTextBlock = regexDescriptionBlock
                         prefs.regexPatternBlock = newValue
                     }
-                    regexText = newValue
+                    regexTextBlock = newValue
+                },
+                modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Ascii,
+                    autoCorrect = false,
+                    capitalization = KeyboardCapitalization.None
+                )
+            )
+        }
+        Row(modifier = Modifier.padding(horizontal = 8.dp)) {
+            OutlinedTextField(
+                label = { Text(stringResource(R.string.regex_pattern_hint)) },
+                supportingText = { Text(regexSupportingTextAllow) },
+                singleLine = false,
+                value = regexTextAllow,
+                isError = regexError,
+                onValueChange = { newValue ->
+                    regexError = !isValidRegex(newValue)
+                    if (regexError) {
+                        regexSupportingTextAllow = regexErrorHint
+                    } else {
+                        regexSupportingTextAllow = regexDescriptionAllow
+                        prefs.regexPatternAllow = newValue
+                    }
+                    regexTextAllow = newValue
                 },
                 modifier = Modifier.weight(1f),
                 keyboardOptions = KeyboardOptions(
